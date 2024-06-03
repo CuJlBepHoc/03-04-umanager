@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"log/slog"
 	"net/http"
 
 	"gitlab.com/robotomize/gb-golang/homework/03-04-umanager/pkg/api/apiv1"
@@ -21,6 +22,7 @@ func (h *usersHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	resp, err := h.client.ListUsers(ctx, &pb.Empty{})
 	if err != nil {
+		slog.Error("Error listing users", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -47,6 +49,7 @@ func (h *usersHandler) PostUsers(w http.ResponseWriter, r *http.Request) {
 	var u apiv1.UserCreate
 	code, err := httputil.Unmarshal(w, r, &u)
 	if err != nil {
+		slog.Error("Bad request error", "error", err)
 		httputil.MarshalResponse(
 			w, code, apiv1.Error{
 				Code:    httputil.ConvertHTTPToErrorCode(code),
@@ -63,6 +66,7 @@ func (h *usersHandler) PostUsers(w http.ResponseWriter, r *http.Request) {
 			Password: u.Password,
 		},
 	); err != nil {
+		slog.Error("Error creating user", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -74,6 +78,7 @@ func (h *usersHandler) DeleteUsersId(w http.ResponseWriter, r *http.Request, id 
 	ctx := r.Context()
 
 	if _, err := h.client.DeleteUser(ctx, &pb.DeleteUserRequest{Id: id}); err != nil {
+		slog.Error("Error deleting user", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -86,6 +91,7 @@ func (h *usersHandler) GetUsersId(w http.ResponseWriter, r *http.Request, id str
 
 	u, err := h.client.GetUser(ctx, &pb.GetUserRequest{Id: id})
 	if err != nil {
+		slog.Error("Error getting user", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -107,6 +113,7 @@ func (h *usersHandler) PutUsersId(w http.ResponseWriter, r *http.Request, id str
 	var u apiv1.UserCreate
 	code, err := httputil.Unmarshal(w, r, &u)
 	if err != nil {
+		slog.Error("Bad request error", "error", err)
 		httputil.MarshalResponse(
 			w, code, apiv1.Error{
 				Code:    httputil.ConvertHTTPToErrorCode(code),
@@ -123,6 +130,7 @@ func (h *usersHandler) PutUsersId(w http.ResponseWriter, r *http.Request, id str
 			Password: u.Password,
 		},
 	); err != nil {
+		slog.Error("Error updating user", "error", err)
 		handleGRPCError(w, err)
 		return
 	}

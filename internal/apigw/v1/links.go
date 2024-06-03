@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"log/slog"
 	"net/http"
 
 	"gitlab.com/robotomize/gb-golang/homework/03-04-umanager/pkg/api/apiv1"
@@ -22,6 +23,7 @@ func (h *linksHandler) GetLinks(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.client.ListLinks(ctx, nil)
 	if err != nil {
+		slog.Error("Error listing links", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -51,6 +53,7 @@ func (h *linksHandler) PostLinks(w http.ResponseWriter, r *http.Request) {
 	var l apiv1.LinkCreate
 	code, err := httputil.Unmarshal(w, r, &l)
 	if err != nil {
+		slog.Error("Bad request error", "error", err)
 		httputil.MarshalResponse(
 			w, code, apiv1.Error{
 				Code:    httputil.ConvertHTTPToErrorCode(code),
@@ -70,6 +73,7 @@ func (h *linksHandler) PostLinks(w http.ResponseWriter, r *http.Request) {
 			UserId: l.UserId,
 		},
 	); err != nil {
+		slog.Error("Error creating link", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -81,6 +85,7 @@ func (h *linksHandler) DeleteLinksId(w http.ResponseWriter, r *http.Request, id 
 	ctx := r.Context()
 
 	if _, err := h.client.DeleteLink(ctx, &pb.DeleteLinkRequest{Id: id}); err != nil {
+		slog.Error("Error deleting link", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -93,6 +98,7 @@ func (h *linksHandler) GetLinksId(w http.ResponseWriter, r *http.Request, id str
 
 	link, err := h.client.GetLink(ctx, &pb.GetLinkRequest{Id: id})
 	if err != nil {
+		slog.Error("Error getting link", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -116,6 +122,7 @@ func (h *linksHandler) PutLinksId(w http.ResponseWriter, r *http.Request, id str
 	var l apiv1.LinkCreate
 	code, err := httputil.Unmarshal(w, r, &l)
 	if err != nil {
+		slog.Error("Bad request error", "error", err)
 		httputil.MarshalResponse(
 			w, code, apiv1.Error{
 				Code:    httputil.ConvertHTTPToErrorCode(code),
@@ -135,6 +142,7 @@ func (h *linksHandler) PutLinksId(w http.ResponseWriter, r *http.Request, id str
 			UserId: l.UserId,
 		},
 	); err != nil {
+		slog.Error("Error updating link", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
@@ -145,6 +153,7 @@ func (h *linksHandler) GetLinksUserUserID(w http.ResponseWriter, r *http.Request
 	ctx := r.Context()
 	resp, err := h.client.GetLinkByUserID(ctx, &pb.GetLinksByUserId{UserId: userID})
 	if err != nil {
+		slog.Error("Error getting links by user ID", "error", err)
 		handleGRPCError(w, err)
 		return
 	}
